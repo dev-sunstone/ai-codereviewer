@@ -118,10 +118,6 @@ function createPrompt(file, chunk, prDetails) {
 Review the following code diff in the file "${file.to}" and take the pull request title and description into account when writing the response.
   
 Pull request title: ${prDetails.title}
-Pull request description:
-
----
-${prDetails.description}
 ---
 
 Git diff to review:
@@ -155,7 +151,10 @@ function getAIResponse(prompt) {
                         content: prompt,
                     },
                 ] }));
-            console.log(response, "response")
+
+            console.error("response of model", response)
+            console.error("content response of model", response.choices[0].message?.content)
+
             const res = ((_b = (_a = response.choices[0].message) === null || _a === void 0 ? void 0 : _a.content) === null || _b === void 0 ? void 0 : _b.trim()) || "{}";
             return JSON.parse(res).reviews;
         }
