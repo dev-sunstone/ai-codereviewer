@@ -152,8 +152,7 @@ function getAIResponse(prompt) {
                     },
                 ] }));
 
-            console.error("response of model", response)
-            console.error("content response of model", response.choices[0].message?.content)
+            console.error("content response of model after replace", response.choices[0].message?.content.replace('```json', '').replace('```', ''))
 
             const res = ((_b = (_a = response.choices[0].message) === null || _a === void 0 ? void 0 : _a.content) === null || _b === void 0 ? void 0 : _b.trim()) || "{}";
             return JSON.parse(res).reviews;
