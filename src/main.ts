@@ -73,7 +73,7 @@ async function analyzeCode(
     if (file.to === "/dev/null") continue; // Ignore deleted files
     for (const chunk of file.chunks) {
       const prompt = createPrompt(file, chunk, prDetails);
-      console.log("prompt to analyze", prompt)
+      console.error("prompt to analyze", prompt)
       const aiResponse = await getAIResponse(prompt);
       if (aiResponse) {
         const newComments = createComment(file, chunk, aiResponse);
@@ -147,11 +147,11 @@ async function getAIResponse(prompt: string): Promise<Array<{
       ],
     });
 
-    console.log("response of model", response)
+    console.error("response of model", response)
     const res = response.choices[0].message?.content?.trim() || "{}";
     return JSON.parse(res).reviews;
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error parsing:", error);
     return null;
   }
 }
