@@ -8,12 +8,19 @@ import minimatch from "minimatch";
 const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
 const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
 const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
+// const BASE_URL: string | null = core.getInput("BASE_URL");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
+const openAiConfig: {baseUrl?: string| null, apiKey: string} = {
+  apiKey: OPENAI_API_KEY
+}
+
+// if (BASE_URL !== '') {
+// 	openAiConfig.baseUrl = BASE_URL
+// }
+
+const openai = new OpenAI(openAiConfig);
 
 interface PRDetails {
   owner: string;
@@ -25,7 +32,7 @@ interface PRDetails {
 
 async function getPRDetails(): Promise<PRDetails> {
   const { repository, number } = JSON.parse(
-    readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8")
+      readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8")
   );
   const prResponse = await octokit.pulls.get({
     owner: repository.owner.login,
@@ -42,9 +49,9 @@ async function getPRDetails(): Promise<PRDetails> {
 }
 
 async function getDiff(
-  owner: string,
-  repo: string,
-  pull_number: number
+    owner: string,
+    repo: string,
+    pull_number: number
 ): Promise<string | null> {
   const response = await octokit.pulls.get({
     owner,
@@ -57,8 +64,8 @@ async function getDiff(
 }
 
 async function analyzeCode(
-  parsedDiff: File[],
-  prDetails: PRDetails
+    parsedDiff: File[],
+    prDetails: PRDetails
 ): Promise<Array<{ body: string; path: string; line: number }>> {
   const comments: Array<{ body: string; path: string; line: number }> = [];
 
@@ -66,6 +73,7 @@ async function analyzeCode(
     if (file.to === "/dev/null") continue; // Ignore deleted files
     for (const chunk of file.chunks) {
       const prompt = createPrompt(file, chunk, prDetails);
+      console.log("prompt to analyze", prompt)
       const aiResponse = await getAIResponse(prompt);
       if (aiResponse) {
         const newComments = createComment(file, chunk, aiResponse);
@@ -88,7 +96,7 @@ function createPrompt(file: File, chunk: Chunk, prDetails: PRDetails): string {
 - IMPORTANT: NEVER suggest adding comments to the code.
 
 Review the following code diff in the file "${
-    file.to
+      file.to
   }" and take the pull request title and description into account when writing the response.
   
 Pull request title: ${prDetails.title}
@@ -103,9 +111,9 @@ Git diff to review:
 \`\`\`diff
 ${chunk.content}
 ${chunk.changes
-  // @ts-expect-error - ln and ln2 exists where needed
-  .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
-  .join("\n")}
+      // @ts-expect-error - ln and ln2 exists where needed
+      .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
+      .join("\n")}
 \`\`\`
 `;
 }
@@ -127,9 +135,10 @@ async function getAIResponse(prompt: string): Promise<Array<{
     const response = await openai.chat.completions.create({
       ...queryConfig,
       // return JSON if the model supports it:
-      ...(OPENAI_API_MODEL === "gpt-4-1106-preview"
-        ? { response_format: { type: "json_object" } }
-        : {}),
+      ...((OPENAI_API_MODEL === "gpt-4-1106-preview")
+              ? { response_format: { type: "json_object" } }
+              : { }
+      ),
       messages: [
         {
           role: "system",
@@ -138,6 +147,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
       ],
     });
 
+    console.log("response of model", response)
     const res = response.choices[0].message?.content?.trim() || "{}";
     return JSON.parse(res).reviews;
   } catch (error) {
@@ -147,12 +157,12 @@ async function getAIResponse(prompt: string): Promise<Array<{
 }
 
 function createComment(
-  file: File,
-  chunk: Chunk,
-  aiResponses: Array<{
-    lineNumber: string;
-    reviewComment: string;
-  }>
+    file: File,
+    chunk: Chunk,
+    aiResponses: Array<{
+      lineNumber: string;
+      reviewComment: string;
+    }>
 ): Array<{ body: string; path: string; line: number }> {
   return aiResponses.flatMap((aiResponse) => {
     if (!file.to) {
@@ -167,10 +177,10 @@ function createComment(
 }
 
 async function createReviewComment(
-  owner: string,
-  repo: string,
-  pull_number: number,
-  comments: Array<{ body: string; path: string; line: number }>
+    owner: string,
+    repo: string,
+    pull_number: number,
+    comments: Array<{ body: string; path: string; line: number }>
 ): Promise<void> {
   await octokit.pulls.createReview({
     owner,
@@ -185,14 +195,14 @@ async function main() {
   const prDetails = await getPRDetails();
   let diff: string | null;
   const eventData = JSON.parse(
-    readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8")
+      readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8")
   );
 
   if (eventData.action === "opened") {
     diff = await getDiff(
-      prDetails.owner,
-      prDetails.repo,
-      prDetails.pull_number
+        prDetails.owner,
+        prDetails.repo,
+        prDetails.pull_number
     );
   } else if (eventData.action === "synchronize") {
     const newBaseSha = eventData.before;
@@ -222,23 +232,24 @@ async function main() {
   const parsedDiff = parseDiff(diff);
 
   const excludePatterns = core
-    .getInput("exclude")
-    .split(",")
-    .map((s) => s.trim());
+      .getInput("exclude")
+      .split(",")
+      .map((s) => s.trim());
 
-  const filteredDiff = parsedDiff.filter((file) => {
-    return !excludePatterns.some((pattern) =>
-      minimatch(file.to ?? "", pattern)
+  // @ts-ignore
+  const filteredDiff = parsedDiff.filter((file: { to: any; }) => {
+    return !excludePatterns.some((pattern: any) =>
+        minimatch(file.to ?? "", pattern)
     );
   });
 
   const comments = await analyzeCode(filteredDiff, prDetails);
   if (comments.length > 0) {
     await createReviewComment(
-      prDetails.owner,
-      prDetails.repo,
-      prDetails.pull_number,
-      comments
+        prDetails.owner,
+        prDetails.repo,
+        prDetails.pull_number,
+        comments
     );
   }
 }
