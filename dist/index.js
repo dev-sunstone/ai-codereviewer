@@ -112,8 +112,8 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
     try {
         console.log("CONFIG", config)
         const response = yield axios_1.default.request(config);
-        console.log("RESPONSE", response)
-        const usefulResponse = JSON.parse(response['response']);
+        console.log("RESPONSE", response['data'])
+        const usefulResponse = JSON.parse(response['data']['response']);
         console.log("RESPONSE", usefulResponse)
         return usefulResponse.reviews;
     }
