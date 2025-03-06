@@ -8,6 +8,8 @@ import minimatch from "minimatch";
 const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
 const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
 const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
+const API_URL: string = core.getInput("API_URL")
+const API_KEY: string = core.getInput('API_KEY')
 // const BASE_URL: string | null = core.getInput("BASE_URL");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
@@ -63,6 +65,31 @@ async function getDiff(
   return response.data;
 }
 
+const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string) => {
+  let data = JSON.stringify({
+    "user_prompt": prompt
+  });
+
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: apiUrl,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': apiKey
+    },
+    data : data
+  };
+  try {
+    const response = await axios.request(config)
+    const usefulResponse = JSON.parse(response['response'])
+    return usefulResponse.reviews
+  } catch (e) {
+    console.log('Error occurred while calling api', e)
+    return null
+  }
+}
+
 async function analyzeCode(
     parsedDiff: File[],
     prDetails: PRDetails
@@ -74,7 +101,8 @@ async function analyzeCode(
     for (const chunk of file.chunks) {
       const prompt = createPrompt(file, chunk, prDetails);
       console.error("prompt to analyze", prompt)
-      const aiResponse = await getAIResponse(prompt);
+      // const aiResponse = await getAIResponse(prompt);
+      const aiResponse = await generateAIResponse(prompt, API_URL, API_KEY)
       if (aiResponse) {
         const newComments = createComment(file, chunk, aiResponse);
         if (newComments) {
