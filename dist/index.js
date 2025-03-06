@@ -41,10 +41,10 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
             };
             Object.defineProperty(exports, "__esModule", { value: true });
             const fs_1 = require("fs");
-            const axios = require('axios');
             const core = __importStar(require("@actions/core"));
             const openai_1 = __importDefault(require("openai"));
             const rest_1 = require("@octokit/rest");
+            const axios_1 = __importDefault(require("axios"));
             const parse_diff_1 = __importDefault(require("parse-diff"));
             const minimatch_1 = __importDefault(require("minimatch"));
             const GITHUB_TOKEN = core.getInput("GITHUB_TOKEN");
@@ -106,7 +106,7 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
                     data: data
                 };
                 try {
-                    const response = yield axios.request(config);
+                    const response = yield axios_1.request(config);
                     const usefulResponse = JSON.parse(response['response']);
                     return usefulResponse.reviews;
                 }

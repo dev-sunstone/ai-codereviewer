@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
+import axios from "axios";
 
 const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
 const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
@@ -81,7 +82,7 @@ const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string
     data : data
   };
   try {
-    const response = await axios.request(config)
+    const response: any = await axios.request(config)
     const usefulResponse = JSON.parse(response['response'])
     return usefulResponse.reviews
   } catch (e) {
