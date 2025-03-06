@@ -95,6 +95,8 @@ function getDiff(owner, repo, pull_number) {
 }
 const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0, void 0, function* () {
     let data = JSON.stringify({
+        "model_name": "deepseek",
+        "system_prompt": "Your task is to review pull requests. Instructions:\n- Provide the response in the following JSON format: {\"reviews\": [{\"lineNumber\":  <line_number>, \"reviewComment\": \"<review comment>\"}]}\n- Do not give positive comments or compliments.\n- Provide comments and suggestions ONLY if there is something to improve, otherwise \"reviews\" should be an empty array.\n- Write the comment in GitHub Markdown format.\n- Use the given description only for the overall context and only comment on the code.\n- IMPORTANT: NEVER suggest adding comments to the code.",
         "user_prompt": prompt
     });
     let config = {
@@ -110,6 +112,7 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
     try {
         const response = yield axios_1.default.request(config);
         const usefulResponse = JSON.parse(response['response']);
+        console.log(usefulResponse)
         return usefulResponse.reviews;
     }
     catch (e) {
