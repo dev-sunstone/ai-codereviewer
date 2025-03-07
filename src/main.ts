@@ -74,7 +74,7 @@ const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string
   let config = {
     method: 'post',
     maxBodyLength: Infinity,
-    url: 'https://christ-decrease-discover-reg.trycloudflare.com/reviewpr',
+    url: apiUrl,
     headers: {
       'X-API-Key': apiKey,
       'Content-Type': 'application/json'
