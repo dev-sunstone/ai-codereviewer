@@ -84,7 +84,7 @@ const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string
   try {
     const response: any = await axios.request(config)
     const usefulResponse = JSON.parse(response['response'])
-    return usefulResponse.reviews
+    return usefulResponse.reviews.trim().replace('```json', '');
   } catch (e) {
     console.log('Error occurred while calling api', e)
     return null
