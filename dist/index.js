@@ -1,4 +1,5 @@
-require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
+require('./sourcemap-register.js');
+/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 3109:
@@ -108,8 +109,13 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
         data: data
     };
     try {
-        const response = yield axios_1.default.request(config);
-        const usefulResponse = JSON.parse(response['response']);
+        console.log("CONFIG", config)
+        let response = yield axios_1.default.request(config);
+        console.log("RESPONSE", response['data'])
+        response = response['data']['response'].trim().replace('```json', '')
+        console.log("RESPONSE", response)
+        const usefulResponse = JSON.parse(response['data']['response']);
+        console.log("RESPONSE", usefulResponse)
         return usefulResponse.reviews;
     }
     catch (e) {
