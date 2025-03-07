@@ -100,7 +100,7 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
     let config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: apiUrl,
+        url: 'https://aerospace-remark-kyle-generated.trycloudflare.com',
         headers: {
             'Content-Type': 'application/json',
             'X-API-Key': apiKey
