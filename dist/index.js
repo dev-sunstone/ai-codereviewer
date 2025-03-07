@@ -113,9 +113,7 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
         let response = yield axios_1.default.request(config);
         response = response['data']['response']
         console.log("RESPONSE!!!!", response)
-        const usefulResponse = JSON.parse(response['data']['response']);
-        console.log("RESPONSE@@@@", usefulResponse)
-        return usefulResponse.reviews;
+        return response.reviews;
     }
     catch (e) {
         console.log('Error occurred while calling api', e);
