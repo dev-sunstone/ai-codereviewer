@@ -111,11 +111,10 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
     try {
         console.log("CONFIG", config)
         let response = yield axios_1.default.request(config);
-        console.log("RESPONSE", response['data'])
-        response = response['data']['response'].trim().replace('```json', '')
-        console.log("RESPONSE", response)
+        response = response['data']['response']
+        console.log("RESPONSE!!!!", response)
         const usefulResponse = JSON.parse(response['data']['response']);
-        console.log("RESPONSE", usefulResponse)
+        console.log("RESPONSE@@@@", usefulResponse)
         return usefulResponse.reviews;
     }
     catch (e) {
@@ -146,25 +145,7 @@ function analyzeCode(parsedDiff, prDetails) {
     });
 }
 function createPrompt(file, chunk, prDetails) {
-    return `Your task is to review pull requests. Instructions:
-- Provide the response in following JSON format:  {"reviews": [{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}]}
-- Do not give positive comments or compliments.
-- Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
-- Write the comment in GitHub Markdown format.
-- Use the given description only for the overall context and only comment the code.
-- IMPORTANT: NEVER suggest adding comments to the code.
-
-Review the following code diff in the file "${file.to}" and take the pull request title and description into account when writing the response.
-  
-Pull request title: ${prDetails.title}
-Pull request description:
-
----
-${prDetails.description}
----
-
-Git diff to review:
-
+    return `
 \`\`\`diff
 ${chunk.content}
 ${chunk.changes
