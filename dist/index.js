@@ -100,7 +100,7 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
     let config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: 'https://aerospace-remark-kyle-generated.trycloudflare.com',
+        url: apiUrl,
         headers: {
             'Content-Type': 'application/json',
             'X-API-Key': apiKey
@@ -108,13 +108,8 @@ const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0,
         data: data
     };
     try {
-        console.log("CONFIG", config)
-        let response = yield axios_1.default.request(config);
-        console.log("RESPONSE", response['data'])
-        response = response['data']['response'].trim().replace('```json', '')
-        console.log("RESPONSE", response)
-        const usefulResponse = JSON.parse(response['data']['response']);
-        console.log("RESPONSE", usefulResponse)
+        const response = yield axios_1.default.request(config);
+        const usefulResponse = JSON.parse(response['response']);
         return usefulResponse.reviews;
     }
     catch (e) {

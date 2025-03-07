@@ -74,22 +74,52 @@ const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string
   let config = {
     method: 'post',
     maxBodyLength: Infinity,
-    url: apiUrl,
+    url: 'https://christ-decrease-discover-reg.trycloudflare.com/reviewpr',
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey
+      'X-API-Key': API_KEY,
+      'Content-Type': 'application/json'
     },
     data : data
   };
   try {
-    const response: any = await axios.request(config)
-    const usefulResponse = JSON.parse(response['response'])
-    return usefulResponse.reviews.trim().replace('```json', '');
+    console.log("CONFIG", config)
+    let response = await axios.request(config);
+    console.log("RESPONSE", response['data'])
+    response = response['data']['response'].trim().replace('```json', '')
+    console.log("RESPONSE", response)
+    const usefulResponse = JSON.parse(response['data']['response']);
+    console.log("RESPONSE", usefulResponse)
+    return usefulResponse.reviews;
   } catch (e) {
     console.log('Error occurred while calling api', e)
     return null
   }
 }
+
+// const generateAIResponse1 = async (prompt: string, apiUrl: string, apiKey: string) => {
+//   let data = JSON.stringify({
+//     "user_prompt": prompt
+//   });
+//
+//   let config = {
+//     method: 'post',
+//     maxBodyLength: Infinity,
+//     url: apiUrl,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'X-API-Key': apiKey
+//     },
+//     data : data
+//   };
+//   try {
+//     const response: any = await axios.request(config)
+//     const usefulResponse = JSON.parse(response['response'])
+//     return usefulResponse.reviews.trim().replace('```json', '');
+//   } catch (e) {
+//     console.log('Error occurred while calling api', e)
+//     return null
+//   }
+// }
 
 async function analyzeCode(
     parsedDiff: File[],
@@ -116,34 +146,13 @@ async function analyzeCode(
 }
 
 function createPrompt(file: File, chunk: Chunk, prDetails: PRDetails): string {
-  return `Your task is to review pull requests. Instructions:
-- Provide the response in following JSON format:  {"reviews": [{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}]}
-- Do not give positive comments or compliments.
-- Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
-- Write the comment in GitHub Markdown format.
-- Use the given description only for the overall context and only comment the code.
-- IMPORTANT: NEVER suggest adding comments to the code.
-
-Review the following code diff in the file "${
-      file.to
-  }" and take the pull request title and description into account when writing the response.
-  
-Pull request title: ${prDetails.title}
-Pull request description:
-
----
-${prDetails.description}
----
-
-Git diff to review:
-
-\`\`\`diff
+  return `
+diff
 ${chunk.content}
 ${chunk.changes
       // @ts-expect-error - ln and ln2 exists where needed
       .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
       .join("\n")}
-\`\`\`
 `;
 }
 
