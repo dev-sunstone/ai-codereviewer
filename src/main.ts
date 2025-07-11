@@ -11,6 +11,7 @@ const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
 const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
 const API_URL: string = core.getInput("API_URL")
 const API_KEY: string = core.getInput('API_KEY')
+const MODEL_NAME: string = core.getInput('MODEL_NAME')
 // const BASE_URL: string | null = core.getInput("BASE_URL");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
@@ -67,8 +68,13 @@ async function getDiff(
 }
 
 const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string) => {
+  let modelName = MODEL_NAME
+  if (!MODEL_NAME) {
+    modelName = 'gpt-4o-mini'
+  }
   let data = JSON.stringify({
-    "user_prompt": prompt
+    "user_prompt": prompt,
+    "model_name": modelName
   });
 
   let config = {
