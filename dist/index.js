@@ -55,6 +55,7 @@ const OPENAI_API_KEY = core.getInput("OPENAI_API_KEY");
 const OPENAI_API_MODEL = core.getInput("OPENAI_API_MODEL");
 const API_URL = core.getInput("API_URL");
 const API_KEY = core.getInput('API_KEY');
+const MODEL_NAME = core.getInput('MODEL_NAME');
 // const BASE_URL: string | null = core.getInput("BASE_URL");
 const octokit = new rest_1.Octokit({ auth: GITHUB_TOKEN });
 const openAiConfig = {
@@ -95,8 +96,13 @@ function getDiff(owner, repo, pull_number) {
     });
 }
 const generateAIResponse = (prompt, apiUrl, apiKey) => __awaiter(void 0, void 0, void 0, function* () {
+    let modelName = MODEL_NAME
+    if (!MODEL_NAME) {
+        modelName = 'gpt-4o-mini'
+    }
     let data = JSON.stringify({
-        "user_prompt": prompt
+        "user_prompt": prompt,
+        'model_name': modelName
     });
     let config = {
         method: 'post',
