@@ -12,6 +12,7 @@ const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
 const API_URL: string = core.getInput("API_URL")
 const API_KEY: string = core.getInput('API_KEY')
 const MODEL_NAME: string = core.getInput('MODEL_NAME')
+const PROMPT_NAME: string = core.getInput('PROMPT_NAME')
 // const BASE_URL: string | null = core.getInput("BASE_URL");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
@@ -74,7 +75,8 @@ const generateAIResponse = async (prompt: string, apiUrl: string, apiKey: string
   }
   let data = JSON.stringify({
     "user_prompt": prompt,
-    "model_name": modelName
+    "model_name": modelName,
+    ...(PROMPT_NAME && { "prompt_name": PROMPT_NAME })
   });
 
   let config = {
